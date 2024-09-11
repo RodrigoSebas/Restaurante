@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Persona {
+  id             String      @id @default(uuid()) @db.Uuid
+  email          String?     @unique
+  nombre         String
+  apellido       String?
+  numeroTelefono Int?        @map("numero_telefono")
+  password       String?
+  rol            PERSONA_ROL @default(CLIENTE)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  pedidos Pedido[]
+
+  @@map("personas")
+}
+
+model Imagen {
+  id          String  @id @default(uuid()) @db.Uuid
+  key         String  @unique
+  path        String?
+  contentType String  @map("content_type")
+  extension   String
+
+  platos Plato[]
+
+  @@map("imagenes")
+}
+
+model Plato {
+  id        String   @id @default(uuid()) @db.Uuid
+  nombre    String
+  precio    Float
+  createdAt DateTime @default(now())
+
+  pedidoId String @map("pedido_id") @db.Uuid
+  imagenId String @map("imagen_id") @db.Uuid
+
+  imagen Imagen? @relation(references: [id], fields: [imagenId])
+  pedido Pedido  @relation(references: [id], fields: [pedidoId])
+
+  @@map("platos")
+}
+
+model Pedido {
+  id        String   @id @default(uuid()) @db.Uuid
+  extras    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  personaId String @map("persona_id") @db.Uuid
+
+  persona Persona @relation(references: [id], fields: [personaId])
+  platos  Plato[]
+
+  @@map("pedidos")
+}
+
+enum PERSONA_ROL {
+  ADMINISTRADOR
+  CLIENTE
+}

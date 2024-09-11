@@ -1,0 +1,23 @@
+{
+  "name": "restaurante",
+  "version": "1.0.0",
+  "description": "API para el manejo de un restaurante",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "crear_migracion": "prisma migrate dev --create-only",
+    "ejecutar_migraciones": "prisma migrate deploy",
+    "generar_prisma_client": "prisma generate",
+    "resetear_bd": "prisma migrate reset"
+  },
+  "keywords": [
+    "restaurante",
+    "comida"
+  ],
+  "author": "Rodrigo Sebastian Trujillo Mirano",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
