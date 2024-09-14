@@ -48,10 +48,10 @@ model Plato {
   createdAt DateTime @default(now())
 
   pedidoId String @map("pedido_id") @db.Uuid
-  imagenId String @map("imagen_id") @db.Uuid
+  imagenId String? @map("imagen_id") @db.Uuid
 
-  imagen Imagen? @relation(references: [id], fields: [imagenId])
-  pedido Pedido  @relation(references: [id], fields: [pedidoId])
+  imagen Imagen? @relation(references: [id], fields: [imagenId], onDelete: Restrict)
+  pedido Pedido  @relation(references: [id], fields: [pedidoId], onDelete: Restrict)
 
   @@map("platos")
 }
@@ -64,7 +64,7 @@ model Pedido {
 
   personaId String @map("persona_id") @db.Uuid
 
-  persona Persona @relation(references: [id], fields: [personaId])
+  persona Persona @relation(references: [id], fields: [personaId], onDelete: Restrict)
   platos  Plato[]
 
   @@map("pedidos")
