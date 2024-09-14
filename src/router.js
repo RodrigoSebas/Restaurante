@@ -12,7 +12,6 @@ import {
 import {
   actualizarPedidoController,
   crearPedidoController,
-  //eliminarPedidoController,
   listarPedidoController,
 } from "./controllers/pedido.controller.js";
 import { validarToken } from "./utils.js";
@@ -20,6 +19,12 @@ import {
   crearPlatoController,
   listarPlatoController,
 } from "./controllers/plato.controller.js";
+
+import {
+  generarUrlFirmada,
+  crearImagen,
+  devolverImagen,
+} from "./controllers/imagen.controller.js";
 
 export const rutas = Router();
 
@@ -50,3 +55,9 @@ rutas
   .route("/plato")
   .post(asyncHandler(crearPlatoController))
   .get(asyncHandler(listarPlatoController));
+
+rutas.route("/generar-url").post(asyncHandler(generarUrlFirmada));
+//luego en la url usar put para subir la imagen
+rutas.route("/imagen").post(asyncHandler(crearImagen));
+
+rutas.route("/image/:id").get(asyncHandler(devolverImagen));

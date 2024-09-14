@@ -23,9 +23,14 @@ export const crearPlatoController = async (req, res) => {
 
   //const platos = await conexion.plato.findMany()
 
+  //esto es para mostrar las relaciones del plato
+  const platos = await conexion.plato.findUniqueOrThrow({
+    where: {id: platoCreado.id},
+    include: { pedido: true, imagen: true },
+  });
   return res.status(200).json({
     message: "Plato creado exitosamente",
-    content: platoCreado,
+    content: platos,
   });
 };
 

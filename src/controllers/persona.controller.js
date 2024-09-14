@@ -4,8 +4,8 @@ import {
   loginSerializer,
 } from "../serializers/persona.serializer.js";
 import { conexion } from "../instancias.js";
-import bcrypt from "bcrypt"
-import jsonwebtoken from "jsonwebtoken"
+import bcrypt from "bcrypt";
+import jsonwebtoken from "jsonwebtoken";
 
 export const crearPersona = async (req, res) => {
   const { error, value } = crearPersonaSerializer.validate(req.body);
@@ -35,7 +35,10 @@ export const crearPersona = async (req, res) => {
 };
 
 export const listarPersonas = async (req, res) => {
-  const personas = await conexion.persona.findMany();
+  const personas = await conexion.persona.findMany({
+    include: { pedidos: { include: { platos:true } } },
+  });
+  
 
   return res.status(404).json({
     message: "Personas",
@@ -110,79 +113,83 @@ export const actualizarPersona = async (req, res) => {
   });
 };
 
-
 export const registroPersona = async (req, res) => {
-    const { error, value } = registroPersonaSerializer.validate(req.body);
-  
-    if (error) {
-      return res.status(400).json({
-        message: "Error al crear la persona",
-        content: error.details,
-      });
-    }
-  
-    const passwordHashed = bcrypt.hashSync(value.password, 10);
-  
-    const personaCreada = await conexion.persona.create({
-      data: { nombre: value.nombre, email: value.email, password: passwordHashed, rol: value.rol },
-      select: { email: true, id: true, rol: true },
+  const { error, value } = registroPersonaSerializer.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({
+      message: "Error al crear la persona",
+      content: error.details,
     });
-  
-    return res.status(201).json({
-      message: "Persona creada exitosamente",
-      content: personaCreada,
+  }
+
+  const passwordHashed = bcrypt.hashSync(value.password, 10);
+
+  const personaCreada = await conexion.persona.create({
+    data: {
+      nombre: value.nombre,
+      email: value.email,
+      password: passwordHashed,
+      rol: value.rol,
+    },
+    select: { email: true, id: true, rol: true },
+  });
+
+  return res.status(201).json({
+    message: "Persona creada y registrada exitosamente",
+    content: personaCreada,
+  });
+};
+
+export const login = async (req, res) => {
+  const { error, value } = loginSerializer.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({
+      message: "Error al hacer el login",
+      content: error.details,
     });
-  };
-  
-  export const login = async (req, res) => {
-    const { error, value } = loginSerializer.validate(req.body);
-    
-    if (error) {
-      return res.status(400).json({
-        message: "Error al hacer el login",
-        content: error.details,
-      });
-    }
-  
-    const personaEncontrada = await conexion.persona.findUniqueOrThrow({
-      where: { email: value.email },
+  }
+
+  const personaEncontrada = await conexion.persona.findUniqueOrThrow({
+    where: { email: value.email },
+  });
+  //console.log(personaEncontrada)
+
+  const esLaPassword = bcrypt.compareSync(
+    value.password,
+    personaEncontrada.password
+  );
+
+  if (esLaPassword === false) {
+    return res.status(400).json({
+      message: "La password es incorrecta",
     });
-    //console.log(personaEncontrada)
-  
-    const esLaPassword = bcrypt.compareSync(
-      value.password,
-      personaEncontrada.password
-    );
-  
-    if (esLaPassword === false) {
-      return res.status(400).json({
-        message: "La password es incorrecta",
-      });
-    }
-  
-    //generar la token
-  
-    const token = jsonwebtoken.sign(
-      { personaId: personaEncontrada.id },
-      process.env.JWT_SECRET,
-      // Si colocamos numeros entonces el valor sera representado en milisegundos
-      // Caso contrario utilizaremos el formato
-      // 2 days | 2d
-      // 10 hours | 10h
-      // 5 seconds | 5s
-      // 1 year | 1y
-      { expiresIn: "5h" }
-    );
-  
-    return res.json({
-      content: token,
-    });
-  };
-  
-  export const perfilPersona = async (req, res) => {
-    const { password, ...data } = req.persona;
-    return res.json({
-      message: "El perfil es",
-      content: data,
-    });
-  };
+  }
+
+  //generar la token
+
+  const token = jsonwebtoken.sign(
+    { personaId: personaEncontrada.id },
+    process.env.JWT_SECRET,
+    // Si colocamos numeros entonces el valor sera representado en milisegundos
+    // Caso contrario utilizaremos el formato
+    // 2 days | 2d
+    // 10 hours | 10h
+    // 5 seconds | 5s
+    // 1 year | 1y
+    { expiresIn: "5h" }
+  );
+
+  return res.json({
+    content: token,
+  });
+};
+
+export const perfilPersona = async (req, res) => {
+  const { password, ...data } = req.persona;
+  return res.json({
+    message: "El perfil es",
+    content: data,
+  });
+};
