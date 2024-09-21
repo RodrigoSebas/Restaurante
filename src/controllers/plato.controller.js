@@ -28,7 +28,7 @@ export const crearPlatoController = async (req, res) => {
     where: {id: platoCreado.id},
     include: { pedido: true, imagen: true },
   });
-  return res.status(200).json({
+  return res.status(201).json({
     message: "Plato creado exitosamente",
     content: platos,
   });

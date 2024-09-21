@@ -56,7 +56,7 @@ export const actualizarPedidoController = async (req, res) => {
   const { value, error } = actualizarPedidoSerializer.validate(req.body);
 
   if (error) {
-    return res.status(300).json({
+    return res.status(400).json({
       message: "Error al actualizar el pedido",
     });
   }
@@ -74,7 +74,7 @@ export const actualizarPedidoController = async (req, res) => {
   });
   //console.log("plato actualizado: ",platoActualizado)
 
-  return res.status(400).json({
+  return res.status(201).json({
     message: "Pedido actualizado exitosamente",
     content: platoActualizado,
   });
